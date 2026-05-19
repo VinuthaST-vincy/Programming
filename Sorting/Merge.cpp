@@ -1,65 +1,84 @@
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
 
-// Merge two sorted halves
-void merge(int arr[], int left, int mid, int right) {
-    int leftSize  = mid - left + 1;
-    int rightSize = right - mid;
+// Algorithm: CombineConquer(B[0...p-1], C[0...q-1], A[0...(p+q)-1])
+// Purpose : Merges two sorted arrays into 1 sorted array
+// Input   : Arrays B & C (sorted)
+// Output  : Sorted array A which is the combined result of B & C
+void CombineConquer(int B[], int p, int C[], int q, int A[]) {
+    int i = 0, j = 0, k = 0;
 
-    // Create temp arrays
-    int leftArr[leftSize];
-    int rightArr[rightSize];
-
-    // Copy data into temp arrays
-    for (int i = 0; i < leftSize; i++)
-        leftArr[i] = arr[left + i];
-    for (int j = 0; j < rightSize; j++)
-        rightArr[j] = arr[mid + 1 + j];
-
-    int i = 0, j = 0, k = left;
-
-    // Pick smaller element and place into arr
-    while (i < leftSize && j < rightSize) {
-        if (leftArr[i] <= rightArr[j])
-            arr[k++] = leftArr[i++];
-        else
-            arr[k++] = rightArr[j++];
+    while (i < p && j < q) {
+        if (B[i] <= C[j]) {
+            A[k] = B[i];
+            i = i + 1;
+        } else {
+            A[k] = C[j];
+            j = j + 1;
+        }
+        k = k + 1;
     }
 
-    // Copy remaining elements
-    while (i < leftSize)  arr[k++] = leftArr[i++];
-    while (j < rightSize) arr[k++] = rightArr[j++];
+    // if i == p → left subarray exhausted, copy remaining C
+    if (i == p) {
+        while (j < q) {
+            A[k] = C[j];
+            j++;
+            k++;
+        }
+    }
+    // else → right subarray exhausted, copy remaining B
+    else {
+        while (i < p) {
+            A[k] = B[i];
+            i++;
+            k++;
+        }
+    }
 }
 
-// Recursively split and sort
-void mergeSort(int arr[], int left, int right) {
-    if (left >= right) return; // Base case: 1 element
+// Algorithm: MergeSort(A[0...n-1])
+// Purpose : Sorts the array A[0...n-1] by recursive merge sort
+// Input   : An array A[0...n-1] of orderable elements
+// Output  : Array A sorted in increasing order
+void MergeSort(int A[], int n) {
+    if (n > 1) {
+        int mid = n / 2;
 
-    int mid = left + (right - left) / 2;
+        // copy A[0 ... floor(n/2)-1] to B[0 ... floor(n/2)-1]
+        int p = mid;
+        int B[p];
+        for (int x = 0; x < p; x++)
+            B[x] = A[x];
 
-    mergeSort(arr, left, mid);       // Sort left half
-    mergeSort(arr, mid + 1, right);  // Sort right half
-    merge(arr, left, mid, right);    // Merge both halves
-}
+        // copy A[floor(n/2) ... n-1] to C[0 ... ceil(n/2)-1]
+        int q = n - mid;
+        int C[q];
+        for (int x = 0; x < q; x++)
+            C[x] = A[mid + x];
 
-// Print array
-void printArray(int arr[], int size) {
-    for (int i = 0; i < size; i++)
-        std::cout << arr[i] << " ";
-    std::cout << "\n";
+        MergeSort(B, p);          // MergeSort(B[0...floor(n/2)-1])
+        MergeSort(C, q);          // MergeSort(C[0...ceil(n/2)-1])
+        CombineConquer(B, p, C, q, A);  // CombineConquer(B, C, A)
+    }
 }
 
 int main() {
-    int arr[] = {38, 27, 43, 3, 9, 82, 10};
-    int size = sizeof(arr) / sizeof(arr[0]);
+    int n;
+    cout << "Enter number of elements: ";
+    cin >> n;
 
-    std::cout << "Before: ";
-    printArray(arr, size);
+    int A[n];
+    cout << "Enter " << n << " elements: ";
+    for (int i = 0; i < n; i++)
+        cin >> A[i];
 
-    mergeSort(arr, 0, size - 1);
+    MergeSort(A, n);
 
-    std::cout << "After:  ";
-    printArray(arr, size);
+    cout << "Sorted array: ";
+    for (int i = 0; i < n; i++)
+        cout << A[i] << " ";
+    cout << endl;
 
     return 0;
 }
